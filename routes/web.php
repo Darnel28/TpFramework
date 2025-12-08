@@ -24,7 +24,8 @@ Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
 Route::get('/decouvrir', [FrontendController::class, 'decouvrir'])->name('decouvrir');
 Route::post('/newsletter/subscribe', [FrontendController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
 // Routes pour les contenus
-Route::get('/contenu/{id}', [FrontendController::class, 'contentDetails'])->name('content.details');
+// Alias sans collision de nom pour la même action
+Route::get('/contenu/{id}', [FrontendController::class, 'contentDetails'])->name('contenu.details');
 Route::post('/contenu/{id}/comment', [FrontendController::class, 'postComment'])->name('content.comment');
 Route::get('/region/{id}', [FrontendController::class, 'regionDetails'])->name('region.details');
 // Routes d'authentification
