@@ -76,10 +76,10 @@ class AuthController extends Controller
          $user->id_role = 4; // Par défaut: contributeur
         $user->id_langue = 6; // Par défaut: Français
         
-        // Handle photo upload
+        // Handle photo upload avec Cloudinary
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('profiles', 'public');
-            $user->photo = $path;
+            $result = $request->file('photo')->storeOnCloudinary('culturebenin/profiles');
+            $user->photo = $result->getSecurePath();
         }
         
         try {

@@ -201,16 +201,16 @@ class DashboardController extends Controller
         $data['id_type_contenu'] = 1;
         $data['date_creation'] = now();
 
-        // Upload image
+        // Upload image avec Cloudinary
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('recettes', 'public');
-            $data['image'] = 'storage/' . $path; // store link like storage/recettes/filename.jpg
+            $result = $request->file('image')->storeOnCloudinary('culturebenin/recettes');
+            $data['image'] = $result->getSecurePath();
         }
 
-        // Upload video
+        // Upload video avec Cloudinary
         if ($request->hasFile('video')) {
-            $path = $request->file('video')->store('recettes/videos', 'public');
-            $data['video'] = 'storage/' . $path;
+            $result = $request->file('video')->storeOnCloudinary('culturebenin/recettes/videos');
+            $data['video'] = $result->getSecurePath();
         }
 
         Contenu::create($data);
@@ -288,10 +288,10 @@ class DashboardController extends Controller
         'id_langue'=>'nullable|integer'
     ]);
 
-    // Handle photo file upload (store in public disk and save link in DB)
+    // Handle photo file upload avec Cloudinary
     if ($request->hasFile('photo')) {
-        $path = $request->file('photo')->store('avatars', 'public');
-        $data['photo'] = 'storage/' . $path; // store link like storage/avatars/...
+        $result = $request->file('photo')->storeOnCloudinary('culturebenin/avatars');
+        $data['photo'] = $result->getSecurePath();
     }
 
     $data['mot_de_passe']=bcrypt($data['mot_de_passe']);

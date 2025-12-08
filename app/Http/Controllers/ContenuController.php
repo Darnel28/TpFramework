@@ -38,10 +38,10 @@ class ContenuController extends Controller
         
 
         
-        // Handle image upload
+        // Handle image upload avec Cloudinary
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('contenus', 'public');
-            $contenu->image = $path;
+            $result = $request->file('image')->storeOnCloudinary('culturebenin/contenus');
+            $contenu->image = $result->getSecurePath();
         }
         
         // Handle video URL
