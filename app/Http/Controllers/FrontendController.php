@@ -330,10 +330,11 @@ public function langueDetails($id)
         $totalContents = array_sum(array_column($regionsArray, 'contenus_count'));
         
         // Trouver la région avec le plus de contenus
-        $maxContents = max(array_column($regionsArray, 'contenus_count'));
-        $mostContentRegion = collect($regionsArray)
+        $contentsCount = array_column($regionsArray, 'contenus_count');
+        $maxContents = !empty($contentsCount) ? max($contentsCount) : 0;
+        $mostContentRegion = !empty($maxContents) ? collect($regionsArray)
             ->where('contenus_count', $maxContents)
-            ->first();
+            ->first() : null;
 
         return view('frontend.regions', [
             'regions' => $regionsArray,
