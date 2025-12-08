@@ -23,13 +23,6 @@ class utilisateurseeder extends Seeder
             ['id_role' => 4, 'nom_role' => 'contributeur', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Créer les langues de base
-        DB::table('langue')->insert([
-            ['id_langue' => 1, 'nom_langue' => 'Français', 'code_langue' => 'fr', 'description' => 'Langue officielle', 'created_at' => now(), 'updated_at' => now()],
-            ['id_langue' => 2, 'nom_langue' => 'Fon', 'code_langue' => 'fon', 'description' => 'Langue nationale', 'created_at' => now(), 'updated_at' => now()],
-            ['id_langue' => 3, 'nom_langue' => 'Yoruba', 'code_langue' => 'yo', 'description' => 'Langue nationale', 'created_at' => now(), 'updated_at' => now()],
-        ]);
-
         // Créer l'utilisateur admin de test
         Utilisateurs::create([
             'nom' => 'DEGUENON',
