@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\utilisateurs as Utilisateur;
+use App\Models\Utilisateurs;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // Créer un enregistrement dans la table `utilisateurs` (modèle personnalisé)
-        $util = new Utilisateur();
+        $util = new Utilisateurs();
         $util->nom = $request->input('nom');
         $util->prenom = $request->input('prenom');
         $util->email = $request->input('email');
