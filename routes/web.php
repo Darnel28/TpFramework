@@ -56,7 +56,7 @@ Route::middleware(['auth',IsAdmin::class ])->group(function () {
 
         // Accueil dashboard
         Route::get('/accueil', [DashboardController::class, 'index'])->name('admin.accueil');
-           Route::post('/contribuer/soumettre', [ContenuController::class, 'store'])->name('contribute.submit');
+        Route::post('/contribuer/soumettre', [ContenuController::class, 'store'])->name('admin.contribute.submit');
 
         // Utilisateurs
         Route::get('/utilisateurs', [DashboardController::class, 'utilisateurs'])->name('admin.utilisateurs');
