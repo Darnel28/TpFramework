@@ -98,14 +98,51 @@
             <div class="col-lg-8">
               <h2>Contenu</h2>
               <div class="content-text">
-                @if(!empty($restricted) && $restricted)
-                    {!! nl2br(e($excerpt)) !!}
-                    <div class="paywall-cta" style="margin-top:16px;">
-                        <button id="voirSuiteBtn" class="btn btn-primary" style="background:#f0ad4e; border:none; padding:10px 14px; border-radius:6px;">Voir la suite (100 XOF)</button>
-                        <small style="display:block; margin-top:8px; color:#666;">Paiement sécurisé par FedaPay</small>
-                    </div>
+                @php
+                  // Compter les mots du contenu
+                  $wordCount = str_word_count(strip_tags($content->texte));
+                  $wordLimit = 200; // Limite de mots avant afficher le paywall
+                  $needsPayment = $wordCount > $wordLimit;
+                  
+                  // Si paiement effectué, afficher tout le contenu
+                  $paidContents = session('paid_contents', []);
+                  $hasPaid = in_array($content->id_contenu, $paidContents);
+                @endphp
+                
+                @if($needsPayment && !$hasPaid)
+                  {{-- Afficher un extrait du contenu --}}
+                  @php
+                    $words = preg_split('/\s+/', strip_tags($content->texte));
+                    $excerpt = implode(' ', array_slice($words, 0, $wordLimit)) . '...';
+                  @endphp
+                  {!! nl2br(e($excerpt)) !!}
+                  
+                  <div class="paywall-cta" style="margin-top:20px; padding:15px; background:#f8f9fa; border-left:4px solid #f0ad4e; border-radius:4px;">
+                    <p style="margin-bottom:12px; color:#666;">
+                      <i class="bi bi-lock-fill" style="color:#f0ad4e; margin-right:8px;"></i>
+                      <strong>Contenu protégé</strong> - {{ $wordCount }} mots disponibles
+                    </p>
+                    <button type="button" id="voirSuiteBtn" class="btn btn-primary" 
+                            data-content-id="{{ $content->id_contenu }}"
+                            style="background:#f0ad4e; border:none; padding:10px 18px; border-radius:6px; font-weight:500; cursor:pointer;">
+                      <i class="bi bi-lock-fill" style="margin-right:6px;"></i>Lire la suite (100 XOF)
+                    </button>
+                    <small style="display:block; margin-top:10px; color:#999; font-size:0.85rem;">
+                      <i class="bi bi-shield-check" style="margin-right:4px;"></i>Paiement sécurisé par FedaPay
+                    </small>
+                  </div>
                 @else
-                    {!! nl2br(e($content->texte)) !!}
+                  {{-- Afficher le contenu complet --}}
+                  {!! nl2br(e($content->texte)) !!}
+                  
+                  @if($hasPaid && $needsPayment)
+                    <div style="margin-top:15px; padding:10px; background:#d4edda; border-left:4px solid #28a745; border-radius:4px;">
+                      <small style="color:#155724;">
+                        <i class="bi bi-check-circle-fill" style="margin-right:6px;"></i>
+                        Merci pour votre paiement ! Vous avez accès au contenu complet.
+                      </small>
+                    </div>
+                  @endif
                 @endif
               </div>
               
@@ -482,6 +519,19 @@ document.addEventListener('DOMContentLoaded', function(){
                 '<a href="$1" target="_blank" rel="nofollow">$1</a>'
             );
         });
+        
+        // Gestion du paiement pour contenu restreint
+        const voirSuiteBtn = document.getElementById('voirSuiteBtn');
+        if (voirSuiteBtn) {
+            voirSuiteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const contentId = this.getAttribute('data-content-id');
+                
+                // Rediriger vers la page de confirmation de paiement
+                window.location.href = '{{ route("payment.confirmation") }}?content_id=' + contentId;
+            });
+        }
     });
 </script>
 @endpush

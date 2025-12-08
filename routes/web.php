@@ -41,6 +41,7 @@ Route::get('/contribuer', [FrontendController::class, 'contribute'])->name('cont
 Route::post('/contribuer/soumettre', [ContenuController::class, 'store'])->name('contribute.submit');
 Route::post('contribute/very', [FrontendController::class, 'verifierAcces'])->name('contribute.verify');
 Route::get('/pay', [PaymentController::class, 'pay'])->name('fedapay.pay');
+Route::get('/payment-confirmation', [FrontendController::class, 'paymentConfirmation'])->name('payment.confirmation');
 // FedaPay callback peut être GET (redirect du navigateur) ou POST (webhook serveur)
 Route::match(['get', 'post'], '/fedapay/callback', [PaymentController::class, 'callback'])->name('fedapay.callback');
 

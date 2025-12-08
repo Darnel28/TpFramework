@@ -827,7 +827,25 @@ public function verifierAcces(Request $request)
     }
 }
  
-    
+    /**
+     * Payment confirmation page
+     */
+    public function paymentConfirmation(Request $request)
+    {
+        $contentId = $request->get('content_id');
+        
+        if (!$contentId) {
+            return redirect()->route('home')->with('error', 'ID de contenu manquant.');
+        }
+        
+        // Vérifier que le contenu existe
+        $content = Contenu::find($contentId);
+        if (!$content) {
+            return redirect()->route('home')->with('error', 'Contenu non trouvé.');
+        }
+        
+        return view('frontend.payment-confirmation', compact('contentId', 'content'));
+    }
 
 
 }
