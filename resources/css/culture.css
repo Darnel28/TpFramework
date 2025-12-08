@@ -1,0 +1,23 @@
+/* Custom overrides for header buttons: remove white background on logout
+	 and reduce spacing between Se connecter and Se deconnecter */
+
+.logout-form.d-inline { display: inline-block; margin: 0; }
+
+/* Reduce the left spacing between header CTAs (override compiled main.css) */
+.header .btn-getstarted {
+	margin: 0 0 0 12px;
+}
+
+/* Ensure the logout button inherits the same visual style as the anchor CTA */
+.header .btn-getstarted.logout-button {
+	background: var(--accent-color);
+	color: var(--contrast-color);
+	padding: 8px 20px;
+	border: none;
+	border-radius: 50px;
+	cursor: pointer;
+}
+
+.header .btn-getstarted.logout-button:hover {
+	background: color-mix(in srgb, var(--accent-color), transparent 15%);
+}
