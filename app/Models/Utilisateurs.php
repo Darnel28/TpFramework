@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\com;
 
 
-class utilisateurs extends Authenticatable
+class Utilisateurs extends Authenticatable
 {
     use HasFactory, Notifiable;
 
