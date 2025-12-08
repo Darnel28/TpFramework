@@ -12,6 +12,6 @@ class Langueseeder extends Seeder
      */
     public function run(): void
     {
-       \App\Models\langue::create(['nom_langue'=>'tori', 'description'=>'langue du benin']);
+       \App\Models\Langue::create(['nom_langue'=>'tori', 'code_langue'=>'tori', 'description'=>'langue du benin']);
     }
 }
