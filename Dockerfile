@@ -32,6 +32,11 @@ RUN php artisan key:generate --force || true
 # Exécuter les migrations
 RUN php artisan migrate --force --no-interaction || true
 
+# Vider les caches et regenerer l'autoloader
+RUN composer dumpautoload -o
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
+
 # Donner les bonnes permissions aux dossiers storage et cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
