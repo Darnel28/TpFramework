@@ -124,33 +124,33 @@ require __DIR__.'/auth.php';
 // Route temporaire pour créer un utilisateur de test
 Route::get('/create-test-user', function () {
     try {
-        // Créer ou mettre à jour le rôle
-        DB::table('role')->updateOrInsert(
-            ['id_role' => 2],
-            ['nom_role' => 'contributeur']
-        );
+        // Créer les rôles de base
+        DB::table('role')->insert([
+            ['id_role' => 1, 'nom_role' => 'super_admin', 'created_at' => now(), 'updated_at' => now()],
+            ['id_role' => 2, 'nom_role' => 'admin', 'created_at' => now(), 'updated_at' => now()],
+            ['id_role' => 3, 'nom_role' => 'moderateur', 'created_at' => now(), 'updated_at' => now()],
+            ['id_role' => 4, 'nom_role' => 'contributeur', 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
-        // Créer ou mettre à jour la langue
-        DB::table('langue')->updateOrInsert(
-            ['id_langue' => 1],
-            ['nom_langue' => 'Français', 'code_langue' => 'fr']
-        );
+        // Créer les langues de base
+        DB::table('langue')->insert([
+            ['id_langue' => 1, 'nom_langue' => 'Français', 'code_langue' => 'fr', 'description' => 'Langue officielle', 'created_at' => now(), 'updated_at' => now()],
+            ['id_langue' => 2, 'nom_langue' => 'Fon', 'code_langue' => 'fon', 'description' => 'Langue nationale', 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
         // Créer l'utilisateur
-        $user = \App\Models\Utilisateurs::updateOrCreate(
-            ['email' => 'morgane.deguenon@example.com'],
-            [
-                'nom' => 'DEGUENON',
-                'prenom' => 'Morgane',
-                'mot_de_passe' => bcrypt('password123'),
-                'sexe' => 'F',
-                'date_inscription' => now(),
-                'date_naissance' => '1995-06-20',
-                'statut' => 'actif',
-                'id_role' => 2,
-                'id_langue' => 1,
-            ]
-        );
+        $user = \App\Models\Utilisateurs::create([
+            'nom' => 'DEGUENON',
+            'prenom' => 'Morgane',
+            'email' => 'morgane.deguenon@example.com',
+            'mot_de_passe' => bcrypt('password123'),
+            'sexe' => 'F',
+            'date_inscription' => now(),
+            'date_naissance' => '1995-06-20',
+            'statut' => 'actif',
+            'id_role' => 2,
+            'id_langue' => 1,
+        ]);
 
         return response()->json([
             'success' => true,
