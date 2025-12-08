@@ -26,6 +26,12 @@ COPY . .
 # Installer les dépendances Laravel
 RUN composer install --optimize-autoloader --no-dev
 
+# Générer APP_KEY si absent
+RUN php artisan key:generate --force || true
+
+# Exécuter les migrations
+RUN php artisan migrate --force --no-interaction || true
+
 # Donner les bonnes permissions aux dossiers storage et cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
