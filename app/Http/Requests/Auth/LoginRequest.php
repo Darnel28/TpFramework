@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Models\utilisateurs;
+use App\Models\Utilisateurs;
 
 class LoginRequest extends FormRequest
 {
