@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Region;
 use App\Models\langue;
-use App\Models\utilisateurs;
+use App\Models\Utilisateurs;
 use App\Models\Contenu;
 
 class DashboardController extends Controller
@@ -56,7 +56,7 @@ class DashboardController extends Controller
     {
         
         try {
-            $users = utilisateurs::all();
+            $users = Utilisateurs::all();
             $langues = Langue::all();
         } catch (\Exception $e) {
             $users = [];
@@ -70,7 +70,7 @@ class DashboardController extends Controller
     {
         // Récupère depuis la table `utilisateurs` les entrées avec id_role = 3 (modérateurs)
         try {
-            $moderators = utilisateurs::where('id_role', 3)->get();
+            $moderators = Utilisateurs::where('id_role', 3)->get();
             $langues = Langue::all();
         } catch (\Exception $e) {
             $moderators = collect();
@@ -234,8 +234,8 @@ class DashboardController extends Controller
                 ->whereIn('id_type_contenu', [2,3])
                 ->get();
 
-        $auteurs = utilisateurs::all(); // <--- Ajoute ça
-        $moderateurs = utilisateurs::where('id_role', 3)->get();
+        $auteurs = Utilisateurs::all(); // <--- Ajoute ça
+        $moderateurs = Utilisateurs::where('id_role', 3)->get();
         $regions = Region::all();
         $langues = Langue::all();
     } catch (\Exception $e) {
@@ -295,7 +295,7 @@ class DashboardController extends Controller
     }
 
     $data['mot_de_passe']=bcrypt($data['mot_de_passe']);
-    utilisateurs::create($data);
+    Utilisateurs::create($data);
 
     return redirect()->back()->with('success','Utilisateur créé.');
 }
@@ -339,7 +339,7 @@ class DashboardController extends Controller
     public function destroyUtilisateur($id)
     {
         try{
-            $user = utilisateurs::findOrFail($id);
+            $user = Utilisateurs::findOrFail($id);
                 // delete avatar from storage if present
                 if(!empty($user->photo) && str_starts_with($user->photo, 'storage/')){
                     $oldPath = substr($user->photo, strlen('storage/'));

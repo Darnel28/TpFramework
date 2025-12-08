@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Contenu;
 use App\Models\Langue;
 use App\Models\Region;
-use App\Models\utilisateurs;
+use App\Models\Utilisateurs;
 use App\Models\Commentaire;
 
 class FrontendController extends Controller
@@ -40,7 +40,7 @@ class FrontendController extends Controller
             ->get();
 
         // Équipe de modération (rôle = 3)
-        $moderateurs = utilisateurs::where('id_role', 3)
+        $moderateurs = Utilisateurs::where('id_role', 3)
             ->select('id_utilisateur', 'nom', 'prenom', 'photo', 'email')
             ->orderBy('nom')
             ->get();

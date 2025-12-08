@@ -12,6 +12,6 @@ class utilisateurseeder extends Seeder
      */
     public function run(): void
     {
-         \App\Models\utilisateurs::create(['nom'=>'DEGUENON', 'prenom'=>'Morgane', 'email'=>'morgane.deguenon@example.com', 'mot_de_passe'=>bcrypt('password123'), 'sexe'=>'F', 'date_inscription'=>'2024-01-15', 'date_naissance'=>'1995-06-20', 'statut'=>'actif', 'id_role'=>2, 'id_langue'=>1]);
+         \App\Models\Utilisateurs::create(['nom'=>'DEGUENON', 'prenom'=>'Morgane', 'email'=>'morgane.deguenon@example.com', 'mot_de_passe'=>bcrypt('password123'), 'sexe'=>'F', 'date_inscription'=>'2024-01-15', 'date_naissance'=>'1995-06-20', 'statut'=>'actif', 'id_role'=>2, 'id_langue'=>1]);
     }
 }

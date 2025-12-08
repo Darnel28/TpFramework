@@ -42,7 +42,7 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         // Récupération de l'utilisateur par email
-        $user = utilisateurs::where('email', $this->input('email'))->first();
+        $user = Utilisateurs::where('email', $this->input('email'))->first();
 
         // Vérification de l'existence et du mot de passe
         if (! $user || ! Hash::check($this->input('password'), $user->mot_de_passe)) {
