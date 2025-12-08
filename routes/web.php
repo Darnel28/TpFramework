@@ -121,4 +121,48 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/auth.php';
 
+// Route temporaire pour créer un utilisateur de test
+Route::get('/create-test-user', function () {
+    try {
+        // Créer ou mettre à jour le rôle
+        DB::table('role')->updateOrInsert(
+            ['id_role' => 2],
+            ['nom_role' => 'contributeur']
+        );
+
+        // Créer ou mettre à jour la langue
+        DB::table('langue')->updateOrInsert(
+            ['id_langue' => 1],
+            ['nom_langue' => 'Français', 'code_langue' => 'fr']
+        );
+
+        // Créer l'utilisateur
+        $user = \App\Models\Utilisateurs::updateOrCreate(
+            ['email' => 'morgane.deguenon@example.com'],
+            [
+                'nom' => 'DEGUENON',
+                'prenom' => 'Morgane',
+                'mot_de_passe' => bcrypt('password123'),
+                'sexe' => 'F',
+                'date_inscription' => now(),
+                'date_naissance' => '1995-06-20',
+                'statut' => 'actif',
+                'id_role' => 2,
+                'id_langue' => 1,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Utilisateur créé avec succès',
+            'user' => $user
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
 
