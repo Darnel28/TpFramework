@@ -270,10 +270,28 @@
             titre.value = titreVal;
             texte.value = texteVal;
 
-            if(img){ previewImg.src = img; previewImg.style.display='block'; downloadImg.href=img; downloadImg.style.display='inline-block'; }
+            if(img){
+                let imgSrc = img;
+                if(!img.startsWith('http')) {
+                    imgSrc = "{{ asset('') }}" + img;
+                }
+                previewImg.src = imgSrc;
+                previewImg.style.display='block';
+                downloadImg.href=imgSrc;
+                downloadImg.style.display='inline-block';
+            }
             else { previewImg.style.display='none'; downloadImg.style.display='none'; }
 
-            if(video){ previewVideo.src=video; previewVideo.style.display='block'; downloadVid.href=video; downloadVid.style.display='inline-block'; }
+            if(video){
+                let videoSrc = video;
+                if(!video.startsWith('http')) {
+                    videoSrc = "{{ asset('') }}" + video;
+                }
+                previewVideo.src=videoSrc;
+                previewVideo.style.display='block';
+                downloadVid.href=videoSrc;
+                downloadVid.style.display='inline-block';
+            }
             else { previewVideo.style.display='none'; previewVideo.src=''; downloadVid.style.display='none'; }
 
             if(editBtn){

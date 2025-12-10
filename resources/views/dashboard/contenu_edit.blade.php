@@ -58,18 +58,28 @@
         </div>
         <div>
             <label>Image</label>
-            <input type="file" name="image">
+            <input type="file" name="image" accept="image/*">
             @if(!empty($contenu->image))
-                <img src="{{ $contenu->image }}" style="max-width:120px; display:block; margin-top:6px;" />
-                <a href="{{ $contenu->image }}" download class="btn btn-secondary">Télécharger</a>
+                @if(str_starts_with($contenu->image, 'http'))
+                    <img src="{{ $contenu->image }}" style="max-width:120px; display:block; margin-top:6px;" />
+                    <a href="{{ $contenu->image }}" download class="btn btn-secondary">Télécharger</a>
+                @else
+                    <img src="{{ asset($contenu->image) }}" style="max-width:120px; display:block; margin-top:6px;" />
+                    <a href="{{ asset($contenu->image) }}" download class="btn btn-secondary">Télécharger</a>
+                @endif
             @endif
         </div>
         <div>
             <label>Vidéo</label>
             <input type="file" name="video" accept="video/*">
             @if(!empty($contenu->video))
-                <video src="{{ $contenu->video }}" controls style="max-width:100%; display:block; margin-top:6px;"></video>
-                <a href="{{ $contenu->video }}" download class="btn btn-secondary">Télécharger</a>
+                @if(str_starts_with($contenu->video, 'http'))
+                    <video src="{{ $contenu->video }}" controls style="max-width:100%; display:block; margin-top:6px;"></video>
+                    <a href="{{ $contenu->video }}" download class="btn btn-secondary">Télécharger</a>
+                @else
+                    <video src="{{ asset($contenu->video) }}" controls style="max-width:100%; display:block; margin-top:6px;"></video>
+                    <a href="{{ asset($contenu->video) }}" download class="btn btn-secondary">Télécharger</a>
+                @endif
             @endif
         </div>
         <div style="margin-top:12px; text-align:right;">

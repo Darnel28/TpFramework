@@ -217,10 +217,34 @@
                 document.getElementById('auteurHistoire').value=auteur;
                 document.getElementById('moderateurHistoire').value=moderateur;
 
-                if(image){ document.getElementById('previewImageHistoire').src=image; document.getElementById('previewImageHistoire').style.display='block'; }
-                else { document.getElementById('previewImageHistoire').style.display='none'; }
-                if(video){ document.getElementById('previewVideoHistoire').src=video; document.getElementById('previewVideoHistoire').style.display='block'; }
-                else { document.getElementById('previewVideoHistoire').style.display='none'; }
+                if(image){
+                    let imageSrc = image;
+                    if(!image.startsWith('http')) {
+                        imageSrc = "{{ asset('') }}" + image;
+                    }
+                    document.getElementById('previewImageHistoire').src=imageSrc;
+                    document.getElementById('previewImageHistoire').style.display='block';
+                    document.getElementById('downloadImageHistoire').href=imageSrc;
+                    document.getElementById('downloadImageHistoire').style.display='inline-block';
+                }
+                else {
+                    document.getElementById('previewImageHistoire').style.display='none';
+                    document.getElementById('downloadImageHistoire').style.display='none';
+                }
+                if(video){
+                    let videoSrc = video;
+                    if(!video.startsWith('http')) {
+                        videoSrc = "{{ asset('') }}" + video;
+                    }
+                    document.getElementById('previewVideoHistoire').src=videoSrc;
+                    document.getElementById('previewVideoHistoire').style.display='block';
+                    document.getElementById('downloadVideoHistoire').href=videoSrc;
+                    document.getElementById('downloadVideoHistoire').style.display='inline-block';
+                }
+                else {
+                    document.getElementById('previewVideoHistoire').style.display='none';
+                    document.getElementById('downloadVideoHistoire').style.display='none';
+                }
 
                 if(viewBtn){
                     titleEl.textContent='Détails de l\'histoire';
