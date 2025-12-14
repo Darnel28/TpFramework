@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: culturebenin_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - storage_volume:/var/www/html/storage
+      - public_volume:/var/www/html/public
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-culturebenin}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+    depends_on:
+      - db
+    networks:
+      - culturebenin_network
+
+  db:
+    image: mysql:8.0
+    container_name: culturebenin_db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-culturebenin}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_USER: ${DB_USERNAME:-root}
+    volumes:
+      - db_volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - culturebenin_network
+
+volumes:
+  storage_volume:
+  public_volume:
+  db_volume:
+
+networks:
+  culturebenin_network:
+    driver: bridge

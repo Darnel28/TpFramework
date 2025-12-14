@@ -29,19 +29,20 @@ RUN composer install --optimize-autoloader --no-dev
 # Générer APP_KEY si absent
 RUN php artisan key:generate --force || true
 
-# Exécuter les migrations
-RUN php artisan migrate --force --no-interaction || true
-
-# Exécuter les seeders
-RUN php artisan db:seed --force --no-interaction || true
+# Donner les bonnes permissions aux dossiers storage, bootstrap et public
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
 # Vider les caches et regenerer l'autoloader
 RUN composer dumpautoload -o
 RUN php artisan config:clear || true
 RUN php artisan cache:clear || true
 
-# Donner les bonnes permissions aux dossiers storage et cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Créer le lien symbolique pour le stockage
+RUN php artisan storage:link || true
+
+# Exécuter les migrations et seeders APRÈS avoir configuré les permissions
+RUN php artisan migrate --force --no-interaction || true
+RUN php artisan db:seed --force --no-interaction || true
 
 # Exposer le port
 EXPOSE 8000
