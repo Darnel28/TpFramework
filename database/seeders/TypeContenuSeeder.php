@@ -19,6 +19,7 @@ class TypeContenuSeeder extends Seeder
             ['nom_contenu' => 'Patrimoine'],
             ['nom_contenu' => 'Tradition'],
             ['nom_contenu' => 'Histoire'],
+            ['nom_contenu' => 'Recette'],
             ['nom_contenu' => 'Culture'],
             ['nom_contenu' => 'Art'],
             ['nom_contenu' => 'Musique'],

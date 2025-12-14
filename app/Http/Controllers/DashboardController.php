@@ -8,6 +8,7 @@ use App\Models\Region;
 use App\Models\Langue;
 use App\Models\Utilisateurs;
 use App\Models\Contenu;
+use App\Models\TypeContenu;
 
 class DashboardController extends Controller
 {
@@ -140,29 +141,18 @@ class DashboardController extends Controller
   public function recettes()
 {
     try {
-        // D'abord, vérifiez ce qui est dans la table
-        $allContents = Contenu::all();
-        \Log::info('Total contenus dans la table: ' . $allContents->count());
-        
-        if ($allContents->count() > 0) {
-            \Log::info('Premier contenu:', [
-                'id' => $allContents->first()->id_contenu,
-                'titre' => $allContents->first()->titre,
-                'id_type_contenu' => $allContents->first()->id_type_contenu,
-                'statut' => $allContents->first()->statut
-            ]);
-        }
-        
-        // Maintenant, récupérez les recettes
+        // Récupérer le type de contenu "Recette"
+        $typeRecette = TypeContenu::where('nom_contenu', 'Recette')->first();
+        $idTypeRecette = $typeRecette ? $typeRecette->id_type_contenu : 6;
+
+        // Récupérez les recettes
         $recettes = Contenu::with([
                     'auteur:id_utilisateur,nom,prenom',
                     'moderateur:id_utilisateur,nom,prenom'
                 ])
-                ->where('id_type_contenu', 1)
+                ->where('id_type_contenu', $idTypeRecette)
                 ->where('parent_id', 0)
                 ->get();
-        
-        \Log::info('Recettes trouvées: ' . $recettes->count());
         
         $regions = Region::all();
         $langues = Langue::all();
@@ -182,44 +172,61 @@ class DashboardController extends Controller
 }
 
     public function storeRecette(Request $request)
-{
-    $data = $request->validate([
-        'titre' => 'required|string|max:255',
-        'texte' => 'required|string',
-        'id_region' => 'required|integer',
-        'id_langue' => 'required|integer',
-        'id_moderateur' => 'nullable|integer',
-        'id_auteur' => 'required|integer',
-        'image' => 'nullable|image',
-        'video' => 'nullable|mimetypes:video/mp4,video/ogg,video/webm|max:20480'
-    ]);
+    {
+        $data = $request->validate([
+            'titre' => 'required|string|max:255',
+            'texte' => 'required|string',
+            'id_region' => 'required|integer',
+            'id_langue' => 'required|integer',
+            'id_moderateur' => 'nullable|integer',
+            'id_auteur' => 'required|integer',
+            'image' => 'nullable|image',
+            'video' => 'nullable|mimetypes:video/mp4,video/ogg,video/webm|max:20480'
+        ]);
 
-    try {
-        // Définition automatique des champs imposés
-        $data['statut'] = 'publié';
-        $data['parent_id'] = 0;
-        $data['id_type_contenu'] = 1;
-        $data['date_creation'] = now();
+        try {
+            // Récupérer le type de contenu "Recette"
+            $typeRecette = \App\Models\TypeContenu::where('nom_contenu', 'Recette')->first();
+            $idTypeContenu = $typeRecette ? $typeRecette->id_type_contenu : 6;
 
-        // Upload image avec Cloudinary
-        if ($request->hasFile('image')) {
-            $result = $request->file('image')->storeOnCloudinary('culturebenin/recettes');
-            $data['image'] = $result->getSecurePath();
+            // Définition automatique des champs imposés
+            $data['statut'] = 'publié';
+            $data['parent_id'] = 0;
+            $data['id_type_contenu'] = $idTypeContenu;
+            $data['date_creation'] = now();
+
+            // Upload image avec Cloudinary ou fallback local
+            if ($request->hasFile('image')) {
+                try {
+                    $result = $request->file('image')->storeOnCloudinary('culturebenin/recettes');
+                    $data['image'] = $result->getSecurePath();
+                } catch (\Exception $e) {
+                    // Fallback: stocker localement
+                    $path = $request->file('image')->store('recettes', 'public');
+                    $data['image'] = 'storage/' . $path;
+                }
+            }
+
+            // Upload video avec Cloudinary ou fallback local
+            if ($request->hasFile('video')) {
+                try {
+                    $result = $request->file('video')->storeOnCloudinary('culturebenin/recettes/videos');
+                    $data['video'] = $result->getSecurePath();
+                } catch (\Exception $e) {
+                    // Fallback: stocker localement
+                    $path = $request->file('video')->store('recettes/videos', 'public');
+                    $data['video'] = 'storage/' . $path;
+                }
+            }
+
+            Contenu::create($data);
+
+            return redirect()->back()->with('success', 'Recette ajoutée avec succès.');
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de l\'ajout de recette: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Impossible d\'ajouter la recette: ' . $e->getMessage()]);
         }
-
-        // Upload video avec Cloudinary
-        if ($request->hasFile('video')) {
-            $result = $request->file('video')->storeOnCloudinary('culturebenin/recettes/videos');
-            $data['video'] = $result->getSecurePath();
-        }
-
-        Contenu::create($data);
-
-        return redirect()->back()->with('success', 'Recette ajoutée avec succès.');
-    } catch (\Exception $e) {
-        return redirect()->back()->withErrors(['error' => 'Impossible d\'ajouter la recette.']);
     }
-}
 
 
 
@@ -231,16 +238,16 @@ class DashboardController extends Controller
                     'auteur:id_utilisateur,nom,prenom',
                     'moderateur:id_utilisateur,nom,prenom'
                 ])
-                ->whereIn('id_type_contenu', [2,3])
+                ->where('id_type_contenu', 3)
                 ->get();
 
-        $auteurs = Utilisateurs::all(); // <--- Ajoute ça
+        $auteurs = Utilisateurs::all();
         $moderateurs = Utilisateurs::where('id_role', 3)->get();
         $regions = Region::all();
         $langues = Langue::all();
     } catch (\Exception $e) {
         $histoires = collect();
-        $auteurs = collect(); // <--- pour éviter l'erreur
+        $auteurs = collect();
         $moderateurs = collect();
         $regions = collect();
         $langues = collect();
@@ -433,10 +440,14 @@ class DashboardController extends Controller
         ]);
 
         try {
+            // Récupérer le type de contenu "Histoire"
+            $typeHistoire = \App\Models\TypeContenu::where('nom_contenu', 'Histoire')->first();
+            $idTypeContenu = $typeHistoire ? $typeHistoire->id_type_contenu : 5;
+
             // Définition des champs
             $data['statut'] = 'publié';
             $data['parent_id'] = 0;
-            $data['id_type_contenu'] = 2; // histoire
+            $data['id_type_contenu'] = $idTypeContenu;
             $data['date_creation'] = now();
 
             // Upload image
