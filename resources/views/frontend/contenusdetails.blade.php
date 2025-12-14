@@ -520,18 +520,7 @@ document.addEventListener('DOMContentLoaded', function(){
             );
         });
         
-        // Gestion du paiement pour contenu restreint
-        const voirSuiteBtn = document.getElementById('voirSuiteBtn');
-        if (voirSuiteBtn) {
-            voirSuiteBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const contentId = this.getAttribute('data-content-id');
-                
-                // Rediriger vers la page de confirmation de paiement
-                window.location.href = '{{ route("payment.confirmation") }}?content_id=' + contentId;
-            });
-        }
+
     });
 </script>
 @endpush
