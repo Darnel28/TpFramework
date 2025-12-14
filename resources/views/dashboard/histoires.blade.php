@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="recent-activity" style="margin-top: 30px;">
-        <h2>Liste des Recettes</h2>
+        <h2>Liste des Histoires et autres contenus</h2>
 
     <div class="table-container">
         <table class="data-table">

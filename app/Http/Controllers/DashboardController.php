@@ -232,29 +232,35 @@ class DashboardController extends Controller
 
 
     public function histoires()
-{
-    try {
-        $histoires = Contenu::with([
-                    'auteur:id_utilisateur,nom,prenom',
-                    'moderateur:id_utilisateur,nom,prenom'
-                ])
-                ->where('id_type_contenu', 3)
-                ->get();
+    {
+        try {
+            // Inclure tous les types de contenus sauf "Recette"
+            $typesInclus = TypeContenu::whereNotIn('nom_contenu', ['Recette'])
+                ->pluck('id_type_contenu');
 
-        $auteurs = Utilisateurs::all();
-        $moderateurs = Utilisateurs::where('id_role', 3)->get();
-        $regions = Region::all();
-        $langues = Langue::all();
-    } catch (\Exception $e) {
-        $histoires = collect();
-        $auteurs = collect();
-        $moderateurs = collect();
-        $regions = collect();
-        $langues = collect();
+            $histoires = Contenu::with([
+                        'auteur:id_utilisateur,nom,prenom',
+                        'moderateur:id_utilisateur,nom,prenom'
+                    ])
+                    ->whereIn('id_type_contenu', $typesInclus)
+                    ->where('parent_id', 0)
+                    ->orderByDesc('date_creation')
+                    ->get();
+
+            $auteurs = Utilisateurs::all();
+            $moderateurs = Utilisateurs::where('id_role', 3)->get();
+            $regions = Region::all();
+            $langues = Langue::all();
+        } catch (\Exception $e) {
+            $histoires = collect();
+            $auteurs = collect();
+            $moderateurs = collect();
+            $regions = collect();
+            $langues = collect();
+        }
+
+        return view('dashboard.histoires', compact('histoires', 'auteurs', 'moderateurs', 'regions', 'langues'));
     }
-
-    return view('dashboard.histoires', compact('histoires', 'auteurs', 'moderateurs', 'regions', 'langues'));
-}
 
 
    
