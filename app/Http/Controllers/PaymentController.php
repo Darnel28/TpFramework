@@ -13,7 +13,11 @@ class PaymentController extends Controller
         $contentId = request()->get('content_id');
 
         \FedaPay\FedaPay::setApiKey(config('services.fedapay.secret_key'));
-        \FedaPay\FedaPay::setEnvironment(config('services.fedapay.mode'));
+        $mode = trim((string) config('services.fedapay.mode'));
+        if (!in_array($mode, ['live', 'sandbox'])) {
+            $mode = 'live';
+        }
+        \FedaPay\FedaPay::setEnvironment($mode);
 
         // montant fixe 100 XOF (en unité XOF)
         $amount = 100;
@@ -29,13 +33,23 @@ class PaymentController extends Controller
                 ];
             }
 
+            // Construire des URLs absolues basées sur l'hôte courant
+            $host = request()->getSchemeAndHttpHost();
+            $callbackUrl = $host . route('fedapay.callback', [], false);
+            $returnUrl = $host . route('content.details', $contentId ?? 0, false);
+            // Forcer HTTPS pour Render
+            if (str_contains($host, 'onrender.com')) {
+                $callbackUrl = preg_replace('/^http:\/\//', 'https://', $callbackUrl);
+                $returnUrl = preg_replace('/^http:\/\//', 'https://', $returnUrl);
+            }
+
             $transactionData = [
                 "amount" => $amount,
                 "currency" => ["iso" => "XOF"],
                 "description" => "Accès contenu #" . ($contentId ?? 'N/A'),
-                "callback_url" => route('fedapay.callback'),
+                "callback_url" => $callbackUrl,
                 // Retour vers la page du contenu après paiement
-                "return_url" => route('content.details', $contentId ?? 0),
+                "return_url" => $returnUrl,
                 "meta" => [
                     'content_id' => $contentId,
                     'user_id' => auth()->id() ?? null
@@ -65,13 +79,23 @@ class PaymentController extends Controller
             ]);
 
             $token = $transaction->generateToken();
+            if (!$token || empty($token->url)) {
+                // Retenter une fois via retrieve
+                $transaction = \FedaPay\Transaction::retrieve($transaction->id);
+                $token = $transaction->generateToken();
+            }
 
             // Log minimal info pour debug
             \Log::info('FedaPay transaction created', ['id' => $transaction->id ?? null, 'content_id' => $contentId, 'token' => $token->id ?? null]);
 
-            return response()->json([
-                'payment_url' => $token->url
-            ]);
+            if ($token && !empty($token->url)) {
+                return response()->json([
+                    'payment_url' => $token->url
+                ]);
+            }
+
+            \Log::error('FedaPay token generation returned empty URL', ['id' => $transaction->id ?? null, 'mode' => $mode, 'callback' => $callbackUrl, 'return' => $returnUrl]);
+            return response()->json(['error' => true, 'message' => 'Paiement indisponible pour le moment.'], 500);
 
         } catch (\Throwable $e) {
             \Log::error('FedaPay create transaction failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
