@@ -214,6 +214,7 @@ Aujourd\'hui, la mémoire des Amazones est célébrée au Bénin comme un symbol
         ];
 
         foreach ($contenus as $contenu) {
+            $contenu['parent_id'] = 0;
             Contenu::create($contenu);
         }
     }

@@ -243,7 +243,10 @@ class DashboardController extends Controller
                         'moderateur:id_utilisateur,nom,prenom'
                     ])
                     ->whereIn('id_type_contenu', $typesInclus)
-                    ->where('parent_id', 0)
+                    ->where(function($query) {
+                        $query->where('parent_id', 0)
+                              ->orWhereNull('parent_id');
+                    })
                     ->orderByDesc('date_creation')
                     ->get();
 
