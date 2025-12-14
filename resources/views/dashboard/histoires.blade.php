@@ -174,6 +174,33 @@
 
     <script>
         (function(){
+            // Assurer que toutes les lignes du tableau sont affichées
+            const table = document.querySelector('.data-table');
+            if (table) {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+            }
+
+            // Recherche en temps réel
+            const searchInput = document.querySelector('input[placeholder="Rechercher une histoire..."]');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const titre = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const texte = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        if (titre.includes(searchTerm) || texte.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
             const modal = document.getElementById("histoireModal");
             const openBtn = document.getElementById("openHistoireModal");
             const closeBtn = document.getElementById("closeHistoireModal");
