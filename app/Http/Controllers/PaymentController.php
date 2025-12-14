@@ -49,14 +49,13 @@ class PaymentController extends Controller
             $transaction = \FedaPay\Transaction::create($transactionData);
 
             // ✅ ENREGISTRER LA TRANSACTION EN BASE DE DONNÉES
-            $userId = auth()->id();
-            // Vérifier que l'utilisateur existe vraiment dans la table 'utilisateurs'
-            $userExists = $userId ? \DB::table('utilisateurs')->where('id_utilisateur', $userId)->exists() : false;
+            // Note: user_id doit être NULL ou correspondre à la table 'users' (pas 'utilisateurs')
+            // Pour le moment, on met NULL pour éviter les conflits de clés étrangères
             
             FedapayTransaction::create([
                 'fedapay_id' => $transaction->id,
                 'content_id' => $contentId,
-                'user_id' => $userExists ? $userId : null, // NULL si l'utilisateur n'existe pas
+                'user_id' => null, // Pas de relation avec users pour l'instant
                 'status' => 'pending',
                 'amount' => $amount,
                 'currency' => 'XOF',
