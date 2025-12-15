@@ -7,9 +7,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Models\Utilisateurs;
+use App\Traits\CloudinaryUpload;
 
 class AuthController extends Controller
 {
+    use CloudinaryUpload;
+
     public function showLogin()
     {
         return view('auth.login');
@@ -78,8 +81,10 @@ class AuthController extends Controller
         
         // Handle photo upload avec Cloudinary
         if ($request->hasFile('photo')) {
-            $result = $request->file('photo')->storeOnCloudinary('culturebenin/profiles');
-            $user->photo = $result->getSecurePath();
+            $photoUrl = $this->storeOnCloudinary($request->file('photo'), 'culturebenin/profiles');
+            if ($photoUrl) {
+                $user->photo = $photoUrl;
+            }
         }
         
         try {

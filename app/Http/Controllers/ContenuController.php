@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Contenu;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\CloudinaryUpload;
 
 class ContenuController extends Controller
 {
+    use CloudinaryUpload;
+
     /**
      * Store a new content submission
      */
@@ -40,8 +43,10 @@ class ContenuController extends Controller
         
         // Handle image upload avec Cloudinary
         if ($request->hasFile('image')) {
-            $result = $request->file('image')->storeOnCloudinary('culturebenin/contenus');
-            $contenu->image = $result->getSecurePath();
+            $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenus');
+            if ($imageUrl) {
+                $contenu->image = $imageUrl;
+            }
         }
         
         // Handle video URL

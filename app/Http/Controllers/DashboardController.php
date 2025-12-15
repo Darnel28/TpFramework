@@ -9,9 +9,12 @@ use App\Models\Langue;
 use App\Models\Utilisateurs;
 use App\Models\Contenu;
 use App\Models\TypeContenu;
+use App\Traits\CloudinaryUpload;
 
 class DashboardController extends Controller
 {
+    use CloudinaryUpload;
+
     // Supprimer ou commenter cette ligne pour enlever l'authentification
     // public function __construct()
     // {
@@ -198,8 +201,14 @@ class DashboardController extends Controller
             // Upload image avec Cloudinary ou fallback local
             if ($request->hasFile('image')) {
                 try {
-                    $result = $request->file('image')->storeOnCloudinary('culturebenin/recettes');
-                    $data['image'] = $result->getSecurePath();
+                    $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/recettes');
+                    if ($imageUrl) {
+                        $data['image'] = $imageUrl;
+                    } else {
+                        // Fallback: stocker localement
+                        $path = $request->file('image')->store('recettes', 'public');
+                        $data['image'] = 'storage/' . $path;
+                    }
                 } catch (\Exception $e) {
                     // Fallback: stocker localement
                     $path = $request->file('image')->store('recettes', 'public');
@@ -210,8 +219,14 @@ class DashboardController extends Controller
             // Upload video avec Cloudinary ou fallback local
             if ($request->hasFile('video')) {
                 try {
-                    $result = $request->file('video')->storeOnCloudinary('culturebenin/recettes/videos');
-                    $data['video'] = $result->getSecurePath();
+                    $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/recettes/videos');
+                    if ($videoUrl) {
+                        $data['video'] = $videoUrl;
+                    } else {
+                        // Fallback: stocker localement
+                        $path = $request->file('video')->store('recettes/videos', 'public');
+                        $data['video'] = 'storage/' . $path;
+                    }
                 } catch (\Exception $e) {
                     // Fallback: stocker localement
                     $path = $request->file('video')->store('recettes/videos', 'public');
@@ -306,8 +321,10 @@ class DashboardController extends Controller
 
     // Handle photo file upload avec Cloudinary
     if ($request->hasFile('photo')) {
-        $result = $request->file('photo')->storeOnCloudinary('culturebenin/avatars');
-        $data['photo'] = $result->getSecurePath();
+        $photoUrl = $this->storeOnCloudinary($request->file('photo'), 'culturebenin/avatars');
+        if ($photoUrl) {
+            $data['photo'] = $photoUrl;
+        }
     }
 
     $data['mot_de_passe']=bcrypt($data['mot_de_passe']);
