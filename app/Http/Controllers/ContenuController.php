@@ -39,13 +39,32 @@ class ContenuController extends Controller
         $contenu->statut = 'en attente';
         $contenu->parent_id = $request->parent_id ?? 0;
         
-
-        
         // Handle image upload avec Cloudinary
         if ($request->hasFile('image')) {
-            $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenus');
-            if ($imageUrl) {
+            try {
+                $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenus');
+                
+                if (!$imageUrl) {
+                    return redirect()->route('contribute')
+                        ->with('error', 'Erreur lors du téléchargement de l\'image. Veuillez réessayer.')
+                        ->withInput();
+                }
+                
+                // Valider l'URL avant de la sauvegarder
+                if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                    \Log::error('Invalid image URL returned from Cloudinary', ['url' => $imageUrl]);
+                    return redirect()->route('contribute')
+                        ->with('error', 'L\'image uploadée n\'a pas pu être vérifiée. Veuillez réessayer.')
+                        ->withInput();
+                }
+                
                 $contenu->image = $imageUrl;
+                \Log::info('Image successfully uploaded', ['url' => $imageUrl, 'titre' => $contenu->titre]);
+            } catch (\Throwable $e) {
+                \Log::error('Image upload exception', ['error' => $e->getMessage()]);
+                return redirect()->route('contribute')
+                    ->with('error', 'Une erreur est survenue lors du téléchargement de l\'image.')
+                    ->withInput();
             }
         }
         

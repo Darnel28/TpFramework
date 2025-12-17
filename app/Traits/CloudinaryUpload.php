@@ -17,6 +17,7 @@ trait CloudinaryUpload
     {
         try {
             if (!$file || !$file->isValid()) {
+                \Log::error('Cloudinary upload - Invalid file');
                 return null;
             }
 
@@ -28,17 +29,43 @@ trait CloudinaryUpload
                 ]
             ]);
 
-            $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+            $uploadOptions = [
                 'folder' => $folder,
                 'resource_type' => 'auto',
+                'eager' => [
+                    ['quality' => 'auto', 'fetch_format' => 'auto'],
+                ],
+                'eager_async' => false,
+            ];
+
+            $result = $cloudinary->uploadApi()->upload($file->getRealPath(), $uploadOptions);
+
+            if (!isset($result['secure_url'])) {
+                \Log::error('Cloudinary upload - Missing secure_url in response', ['result' => $result]);
+                return null;
+            }
+
+            $url = $result['secure_url'];
+            
+            // Vérifier que l'URL est valide
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                \Log::error('Cloudinary upload - Invalid URL returned', ['url' => $url]);
+                return null;
+            }
+
+            \Log::info('Cloudinary upload successful', [
+                'file' => $file->getClientOriginalName(),
+                'folder' => $folder,
+                'url' => $url,
             ]);
 
-            return $result['secure_url'] ?? null;
+            return $url;
         } catch (\Throwable $e) {
             \Log::error('Cloudinary upload failed', [
                 'error' => $e->getMessage(),
                 'file' => $file->getClientOriginalName() ?? 'unknown',
                 'folder' => $folder,
+                'trace' => $e->getTraceAsString(),
             ]);
             return null;
         }

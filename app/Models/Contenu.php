@@ -27,6 +27,39 @@ class Contenu extends Model
         'video'
     ];
     
+    /**
+     * Mutateur : valider et nettoyer l'URL de l'image avant de la sauvegarder
+     */
+    public function setImageAttribute($value)
+    {
+        // Si valeur vide, garder null
+        if (empty($value)) {
+            $this->attributes['image'] = null;
+            return;
+        }
+
+        // Vérifier que c'est une URL valide
+        if (!filter_var($value, FILTER_VALIDATE_URL)) {
+            \Log::warning('Invalid image URL attempted to save', [
+                'url' => $value,
+                'titre' => $this->titre ?? 'Unknown'
+            ]);
+            $this->attributes['image'] = null;
+            return;
+        }
+
+        // Vérifier que c'est une URL Cloudinary
+        if (!str_contains($value, 'cloudinary.com') && !str_contains($value, 'unsplash.com') && !str_contains($value, 'res.')) {
+            \Log::warning('Non-Cloudinary image URL', [
+                'url' => $value,
+                'titre' => $this->titre ?? 'Unknown'
+            ]);
+            // Accepter quand même car on peut utiliser d'autres sources
+        }
+
+        $this->attributes['image'] = $value;
+    }
+    
     // AJOUTEZ CETTE PROPRIÉTÉ POUR LES ACCESSORS
     protected $appends = [
         'has_video',
