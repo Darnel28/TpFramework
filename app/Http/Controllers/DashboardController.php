@@ -476,22 +476,27 @@ class DashboardController extends Controller
             $data['id_type_contenu'] = $idTypeContenu;
             $data['date_creation'] = now();
 
-            // Upload image (Cloudinary obligatoire pour éviter la perte en hébergement éphémère)
+            // Upload image (Cloudinary, fallback local si échec pour ne pas perdre la saisie)
             if ($request->hasFile('image')) {
                 $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/histoires');
-                if (!$imageUrl) {
-                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de l'image sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
+                if ($imageUrl) {
+                    $data['image'] = $imageUrl;
+                } else {
+                    // Fallback local (attention: éphémère sur Render)
+                    $path = $request->file('image')->store('histoires', 'public');
+                    $data['image'] = 'storage/' . $path;
                 }
-                $data['image'] = $imageUrl;
             }
 
-            // Upload video (Cloudinary obligatoire)
+            // Upload video (Cloudinary, fallback local si échec)
             if ($request->hasFile('video')) {
                 $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/histoires/videos');
-                if (!$videoUrl) {
-                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de la vidéo sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
+                if ($videoUrl) {
+                    $data['video'] = $videoUrl;
+                } else {
+                    $path = $request->file('video')->store('histoires/videos', 'public');
+                    $data['video'] = 'storage/' . $path;
                 }
-                $data['video'] = $videoUrl;
             }
 
             Contenu::create($data);
@@ -534,7 +539,7 @@ class DashboardController extends Controller
         try {
             $contenu = Contenu::findOrFail($id);
 
-            // Handle image replacement (Cloudinary obligatoire)
+            // Handle image replacement (Cloudinary, fallback local si échec)
             if ($request->hasFile('image')) {
                 if (!empty($contenu->image) && str_starts_with($contenu->image, 'storage/')) {
                     $oldPath = substr($contenu->image, strlen('storage/'));
@@ -542,13 +547,15 @@ class DashboardController extends Controller
                 }
 
                 $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenu');
-                if (!$imageUrl) {
-                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de l'image sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
+                if ($imageUrl) {
+                    $data['image'] = $imageUrl;
+                } else {
+                    $path = $request->file('image')->store('contenu', 'public');
+                    $data['image'] = 'storage/' . $path;
                 }
-                $data['image'] = $imageUrl;
             }
 
-            // Handle video replacement (Cloudinary obligatoire)
+            // Handle video replacement (Cloudinary, fallback local si échec)
             if ($request->hasFile('video')) {
                 if (!empty($contenu->video) && str_starts_with($contenu->video, 'storage/')) {
                     $oldPath = substr($contenu->video, strlen('storage/'));
@@ -556,10 +563,12 @@ class DashboardController extends Controller
                 }
 
                 $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/contenu/videos');
-                if (!$videoUrl) {
-                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de la vidéo sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
+                if ($videoUrl) {
+                    $data['video'] = $videoUrl;
+                } else {
+                    $path = $request->file('video')->store('contenu/videos', 'public');
+                    $data['video'] = 'storage/' . $path;
                 }
-                $data['video'] = $videoUrl;
             }
 
             $contenu->update($data);
