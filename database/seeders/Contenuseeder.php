@@ -82,7 +82,7 @@ class Contenuseeder extends Seeder
                 'id_moderateur' => $auteur->id_utilisateur,
             ],
             [
-                'titre' => 'Les Palais Royaux d\'Abomey',
+                'titre' => 'Les Palais Royaux d \'Abomey',
                 'texte' => 'Les Palais Royaux d\'Abomey sont un ensemble de 12 palais construits par les rois successifs du Dahomey entre le 17ème et le 19ème siècle. Inscrits au patrimoine mondial de l\'UNESCO, ces palais témoignent de la puissance du royaume précolonial. Leurs bas-reliefs racontent l\'histoire glorieuse des Amazones du Dahomey et des conquêtes royales.',
                 'image' => 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=800',
                 'date_creation' => Carbon::now()->subDays(2),

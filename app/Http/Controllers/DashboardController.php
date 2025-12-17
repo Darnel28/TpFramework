@@ -476,36 +476,22 @@ class DashboardController extends Controller
             $data['id_type_contenu'] = $idTypeContenu;
             $data['date_creation'] = now();
 
-            // Upload image (Cloudinary puis fallback local)
+            // Upload image (Cloudinary obligatoire pour éviter la perte en hébergement éphémère)
             if ($request->hasFile('image')) {
-                try {
-                    $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/histoires');
-                    if ($imageUrl) {
-                        $data['image'] = $imageUrl;
-                    } else {
-                        $path = $request->file('image')->store('histoires', 'public');
-                        $data['image'] = 'storage/' . $path;
-                    }
-                } catch (\Exception $e) {
-                    $path = $request->file('image')->store('histoires', 'public');
-                    $data['image'] = 'storage/' . $path;
+                $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/histoires');
+                if (!$imageUrl) {
+                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de l'image sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
                 }
+                $data['image'] = $imageUrl;
             }
 
-            // Upload video (Cloudinary puis fallback local)
+            // Upload video (Cloudinary obligatoire)
             if ($request->hasFile('video')) {
-                try {
-                    $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/histoires/videos');
-                    if ($videoUrl) {
-                        $data['video'] = $videoUrl;
-                    } else {
-                        $path = $request->file('video')->store('histoires/videos', 'public');
-                        $data['video'] = 'storage/' . $path;
-                    }
-                } catch (\Exception $e) {
-                    $path = $request->file('video')->store('histoires/videos', 'public');
-                    $data['video'] = 'storage/' . $path;
+                $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/histoires/videos');
+                if (!$videoUrl) {
+                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de la vidéo sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
                 }
+                $data['video'] = $videoUrl;
             }
 
             Contenu::create($data);
@@ -548,46 +534,32 @@ class DashboardController extends Controller
         try {
             $contenu = Contenu::findOrFail($id);
 
-            // Handle image replacement
+            // Handle image replacement (Cloudinary obligatoire)
             if ($request->hasFile('image')) {
-                // delete old image si locale
                 if (!empty($contenu->image) && str_starts_with($contenu->image, 'storage/')) {
                     $oldPath = substr($contenu->image, strlen('storage/'));
                     try { Storage::disk('public')->delete($oldPath); } catch (\Exception $e) { /* ignore */ }
                 }
 
-                try {
-                    $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenu');
-                    if ($imageUrl) {
-                        $data['image'] = $imageUrl;
-                    } else {
-                        $path = $request->file('image')->store('contenu', 'public');
-                        $data['image'] = 'storage/' . $path;
-                    }
-                } catch (\Exception $e) {
-                    $path = $request->file('image')->store('contenu', 'public');
-                    $data['image'] = 'storage/' . $path;
+                $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenu');
+                if (!$imageUrl) {
+                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de l'image sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
                 }
+                $data['image'] = $imageUrl;
             }
 
+            // Handle video replacement (Cloudinary obligatoire)
             if ($request->hasFile('video')) {
                 if (!empty($contenu->video) && str_starts_with($contenu->video, 'storage/')) {
                     $oldPath = substr($contenu->video, strlen('storage/'));
                     try { Storage::disk('public')->delete($oldPath); } catch (\Exception $e) { /* ignore */ }
                 }
 
-                try {
-                    $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/contenu/videos');
-                    if ($videoUrl) {
-                        $data['video'] = $videoUrl;
-                    } else {
-                        $path = $request->file('video')->store('contenu/videos', 'public');
-                        $data['video'] = 'storage/' . $path;
-                    }
-                } catch (\Exception $e) {
-                    $path = $request->file('video')->store('contenu/videos', 'public');
-                    $data['video'] = 'storage/' . $path;
+                $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/contenu/videos');
+                if (!$videoUrl) {
+                    return redirect()->back()->withErrors(['error' => "Échec de l'upload de la vidéo sur Cloudinary. Vérifiez vos identifiants Cloudinary."]);
                 }
+                $data['video'] = $videoUrl;
             }
 
             $contenu->update($data);
