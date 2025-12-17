@@ -49,7 +49,7 @@
                             data-langue="{{ $h->id_langue ?? '' }}"
                             data-auteur="{{ $h->id_auteur ?? '' }}"
                             data-moderateur="{{ $h->id_moderateur ?? '' }}"
-                            data-image="{{ $h->image ?? '' }}"
+                            data-image="{{ $h->image_url ?? '' }}"
                             data-video="{{ $h->video ?? '' }}"
                         ><i class="fas fa-eye"></i></button>
 
@@ -61,7 +61,7 @@
                             data-langue="{{ $h->id_langue ?? '' }}"
                             data-auteur="{{ $h->id_auteur ?? '' }}"
                             data-moderateur="{{ $h->id_moderateur ?? '' }}"
-                            data-image="{{ $h->image ?? '' }}"
+                            data-image="{{ $h->image_url ?? '' }}"
                             data-video="{{ $h->video ?? '' }}"
                         ><i class="fas fa-edit"></i></button>
 

@@ -476,16 +476,36 @@ class DashboardController extends Controller
             $data['id_type_contenu'] = $idTypeContenu;
             $data['date_creation'] = now();
 
-            // Upload image
+            // Upload image (Cloudinary puis fallback local)
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('histoires', 'public');
-                $data['image'] = 'storage/' . $path;
+                try {
+                    $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/histoires');
+                    if ($imageUrl) {
+                        $data['image'] = $imageUrl;
+                    } else {
+                        $path = $request->file('image')->store('histoires', 'public');
+                        $data['image'] = 'storage/' . $path;
+                    }
+                } catch (\Exception $e) {
+                    $path = $request->file('image')->store('histoires', 'public');
+                    $data['image'] = 'storage/' . $path;
+                }
             }
 
-            // Upload video
+            // Upload video (Cloudinary puis fallback local)
             if ($request->hasFile('video')) {
-                $path = $request->file('video')->store('histoires/videos', 'public');
-                $data['video'] = 'storage/' . $path;
+                try {
+                    $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/histoires/videos');
+                    if ($videoUrl) {
+                        $data['video'] = $videoUrl;
+                    } else {
+                        $path = $request->file('video')->store('histoires/videos', 'public');
+                        $data['video'] = 'storage/' . $path;
+                    }
+                } catch (\Exception $e) {
+                    $path = $request->file('video')->store('histoires/videos', 'public');
+                    $data['video'] = 'storage/' . $path;
+                }
             }
 
             Contenu::create($data);
@@ -530,13 +550,24 @@ class DashboardController extends Controller
 
             // Handle image replacement
             if ($request->hasFile('image')) {
-                // delete old image
+                // delete old image si locale
                 if (!empty($contenu->image) && str_starts_with($contenu->image, 'storage/')) {
                     $oldPath = substr($contenu->image, strlen('storage/'));
                     try { Storage::disk('public')->delete($oldPath); } catch (\Exception $e) { /* ignore */ }
                 }
-                $path = $request->file('image')->store('contenu', 'public');
-                $data['image'] = 'storage/' . $path;
+
+                try {
+                    $imageUrl = $this->storeOnCloudinary($request->file('image'), 'culturebenin/contenu');
+                    if ($imageUrl) {
+                        $data['image'] = $imageUrl;
+                    } else {
+                        $path = $request->file('image')->store('contenu', 'public');
+                        $data['image'] = 'storage/' . $path;
+                    }
+                } catch (\Exception $e) {
+                    $path = $request->file('image')->store('contenu', 'public');
+                    $data['image'] = 'storage/' . $path;
+                }
             }
 
             if ($request->hasFile('video')) {
@@ -544,8 +575,19 @@ class DashboardController extends Controller
                     $oldPath = substr($contenu->video, strlen('storage/'));
                     try { Storage::disk('public')->delete($oldPath); } catch (\Exception $e) { /* ignore */ }
                 }
-                $path = $request->file('video')->store('contenu/videos', 'public');
-                $data['video'] = 'storage/' . $path;
+
+                try {
+                    $videoUrl = $this->storeOnCloudinary($request->file('video'), 'culturebenin/contenu/videos');
+                    if ($videoUrl) {
+                        $data['video'] = $videoUrl;
+                    } else {
+                        $path = $request->file('video')->store('contenu/videos', 'public');
+                        $data['video'] = 'storage/' . $path;
+                    }
+                } catch (\Exception $e) {
+                    $path = $request->file('video')->store('contenu/videos', 'public');
+                    $data['video'] = 'storage/' . $path;
+                }
             }
 
             $contenu->update($data);

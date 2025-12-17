@@ -60,7 +60,7 @@
       @endif
     @elseif($content->image)
       <!-- Image seulement -->
-      <img src="{{ $content->image_url }}" alt="{{ $content->titre }}" class="img-fluid w-100">
+      <img src="{{ $content->image_url }}" alt="{{ $content->titre }}" class="img-fluid w-100" id="content-full-image" style="cursor: zoom-in;">
     @else
       <!-- Image par défaut -->
       <img src="{{ asset('assets/img/travel/logo.png') }}" alt="{{ $content->titre }}" class="img-fluid w-100">
@@ -408,6 +408,11 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 @endpush
 
+<!-- Fullscreen image viewer -->
+<div id="fullImageOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; cursor: zoom-out;">
+  <img id="fullImage" src="" alt="Image plein écran" style="max-width:90%; max-height:90%; box-shadow:0 10px 30px rgba(0,0,0,0.4); border-radius:8px;">
+</div>
+
 @push('styles')
 <style>
     .video-container {
@@ -488,6 +493,25 @@ document.addEventListener('DOMContentLoaded', function(){
 
 @push('scripts')
 <script>
+  // Fullscreen image viewer
+  document.addEventListener('DOMContentLoaded', function() {
+    const img = document.getElementById('content-full-image');
+    const overlay = document.getElementById('fullImageOverlay');
+    const fullImg = document.getElementById('fullImage');
+
+    if (img && overlay && fullImg) {
+      img.addEventListener('click', () => {
+        fullImg.src = img.src;
+        overlay.style.display = 'flex';
+      });
+
+      overlay.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        fullImg.src = '';
+      });
+    }
+  });
+
     function shareContent() {
         if (navigator.share) {
             navigator.share({

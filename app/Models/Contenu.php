@@ -28,7 +28,7 @@ class Contenu extends Model
     ];
     
     /**
-     * Mutateur : valider et nettoyer l'URL de l'image avant de la sauvegarder
+     * Mutateur : accepter les URLs (Cloudinary, externes) et les chemins locaux (storage/...)
      */
     public function setImageAttribute($value)
     {
@@ -38,25 +38,19 @@ class Contenu extends Model
             return;
         }
 
-        // Vérifier que c'est une URL valide
-        if (!filter_var($value, FILTER_VALIDATE_URL)) {
-            \Log::warning('Invalid image URL attempted to save', [
-                'url' => $value,
-                'titre' => $this->titre ?? 'Unknown'
-            ]);
-            $this->attributes['image'] = null;
+        // Autoriser les chemins locaux (storage/...) ou relatifs
+        if (str_starts_with($value, 'storage/') || str_starts_with($value, 'uploads/') || str_starts_with($value, 'public/')) {
+            $this->attributes['image'] = $value;
             return;
         }
 
-        // Vérifier que c'est une URL Cloudinary
-        if (!str_contains($value, 'cloudinary.com') && !str_contains($value, 'unsplash.com') && !str_contains($value, 'res.')) {
-            \Log::warning('Non-Cloudinary image URL', [
-                'url' => $value,
-                'titre' => $this->titre ?? 'Unknown'
-            ]);
-            // Accepter quand même car on peut utiliser d'autres sources
+        // Si c'est une URL, vérifier la validité
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            $this->attributes['image'] = $value;
+            return;
         }
 
+        // Sinon, accepter tel quel (ex: chemin relatif personnalisé)
         $this->attributes['image'] = $value;
     }
     
