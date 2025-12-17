@@ -229,7 +229,17 @@
 
                 const id = btn.getAttribute('data-id');
                 const titre = btn.getAttribute('data-titre') || '';
-                const texte = btn.getAttribute('data-texte') || '';
+                const decodeHtml = (str) => {
+                    if (!str) return '';
+                    return str
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#039;/g, "'");
+                };
+
+                const texte = decodeHtml(btn.getAttribute('data-texte'));
                 const region = btn.getAttribute('data-region') || '';
                 const langue = btn.getAttribute('data-langue') || '';
                 const auteur = btn.getAttribute('data-auteur') || '';
